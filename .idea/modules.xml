@@ -2,7 +2,11 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+<<<<<<< HEAD
       <module fileurl="file://$PROJECT_DIR$/.idea/Spider.iml" filepath="$PROJECT_DIR$/.idea/Spider.iml" />
+=======
+      <module fileurl="file://$PROJECT_DIR$/.idea/html.iml" filepath="$PROJECT_DIR$/.idea/html.iml" />
+>>>>>>> master
     </modules>
   </component>
 </project>
