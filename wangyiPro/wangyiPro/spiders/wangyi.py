@@ -12,7 +12,6 @@ class WangyiSpider(scrapy.Spider):
     urls=[] #最终存放的就是五个板块对应的url
     def parse(self, response):
         li_list=response.xpath('//*[@id="index2016_wrap"]/div[1]/div[2]/div[2]/div[2]/div[2]/div/ul/li')
-        #拿到列表中的34678
         for index in [3,4,6,7,8]:
             li=li_list[index]
             new_url=li.xpath('./a/@href').extract_first()
