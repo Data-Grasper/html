@@ -21,10 +21,7 @@ ITEM_PIPELINES = {
 DOWNLOADER_MIDDLEWARES={
     'wangyiPro.middlewares.WangyiproDownloaderMiddleware':543
 }
-WANGYI_LIMIT=10
-WANGYI_API="http://c.3g.163.com/nc/article/list/T1348648517839/0-20.html".format('{}', WANGYI_LIMIT)
-# Crawl responsibly by identifying yourself (and your website) on the user-agent
-#USER_AGENT = 'wangyiPro (+http://www.yourdomain.com)'
+
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = True
