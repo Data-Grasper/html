@@ -11,37 +11,26 @@ from time import sleep
 class WangyiproDownloaderMiddleware(object):
 
     def process_request(self, request, spider):
-        # Called for each request that goes through the downloader
-        # middleware.
-
-        # Must either:
-        # - return None: continue processing this request
-        # - or return a Response object
-        # - or return a Request object
-        # - or raise IgnoreRequest: process_exception() methods of
-        #   installed downloader middleware will be called
         return None
-    #拦截整个工程中所有的响应对象,一请求对应一响应
+
+    #拦截到响应对象，即下载器传递给spider的响应对象
     def process_response(self, request, response, spider):
-        if request.url in spider.urls:
-            #就要将其对应的响应对象进行处理
-            #获取了在爬虫类中定义号的浏览器对象
-            bro=spider.bro   #包含动态加载出来的数据
-            bro.get(request.url)
+        #request：响应对象对应的请求对象
+        #response：拦截到的响应对象
+        #spider：爬虫文件中对应的爬虫类实例
+        if request.url in ["http://news.163.com/domestic/","http://news.163.com/world/","http://war.163.com/","http://news.163.com/air/"]:
+            spider.bro.get(url=request.url)
 
-            bro.execute_script('window.scrollTo(0,document.body.scrollHeight)')
-            sleep(1)
-            bro.execute_script('window.scrollTo(0,document.body.scrollHeight)')
-            sleep(1)
-            bro.execute_script('window.scrollTo(0,document.body.scrollHeight)')
-            sleep(1)
-            bro.execute_script('window.scrollTo(0,document.body.scrollHeight)')
-            sleep(1)
-
-            #获取携带了新闻数据的页面源码数据
-            page_text=bro.page_source    #spider.bro.current_url==request.url
-            new_response=HtmlResponse(url=request.url,body=page_text,encoding='utf-8',request=request)
-            return new_response
+            #将滚轮滚动到最底部
+            js="window.scrollTo(0,document.body.scrollHeight)"
+            spider.bro.execute_script(js)
+            #如果没有获取到更多的数据，这里给浏览器一定的加载时间
+            #time.sleep(3
+            page_text=spider.bro.page_source
+            with open("./domestic.html","w",encoding="utf8") as fp:
+                fp.write(page_text)
+            #自己封装response，并返回
+            return HtmlResponse(url=spider.bro.current_url,body=page_text,encoding="utf-8",request=request)
         else:
             return response
 

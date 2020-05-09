@@ -1,43 +1,54 @@
-# -*- coding: utf-8 -*-
 import scrapy
-from wangyiPro.items import WangyiproItem
 from selenium import webdriver
-
+from wangyiPro.items import WangyiproItem
 class WangyiSpider(scrapy.Spider):
     name = 'wangyi'
-    # allowed_domains = ['www.xxx.com']
+    #allowed_domains = ['news.163.com']
     start_urls = ['https://news.163.com/']
-    #浏览器实例化的操作只会被执行一次
-    bro=webdriver.Chrome(executable_path='chromedriver.exe')
-    urls=[] #最终存放的就是五个板块对应的url
-    def parse(self, response):
-        li_list=response.xpath('//*[@id="index2016_wrap"]/div[1]/div[2]/div[2]/div[2]/div[2]/div/ul/li')
-        for index in [3,4,6,7,8]:
-            li=li_list[index]
-            new_url=li.xpath('./a/@href').extract_first()
-            #是五大版块对应的url进行请求发送
-            self.urls.append(new_url)
-            yield scrapy.Request(url=new_url,callback=self.parse_news)
-            #解析每个版块对应的数据
-    #是用来解析每一个版块对应的新闻数据(新闻的标题)
-    def parse_news(self,response):
-        div_list=response.xpath('//div[@class="ndi_main"]/div')
-        for div in div_list:
-            title=div.xpath("./div/div[1]/h3/a/text()").extract_first()
-            news_detail_url=div.xpath("./div/div[1]/h3/a/@href").extract_first()
 
-            #实例化item对象将解析到的标题和内容存储到item对象中
+    def __init__(self):
+        #实例化一个浏览器，只需要执行一次
+        self.bro=webdriver.Chrome(executable_path='chromedriver.exe')
+
+    def parse(self, response):
+        lis=response.xpath("//div[@class='ns_area list']/ul/li")
+        indexs=[3,4,6,7]
+        li_list=[]
+        for index in indexs:
+            li_list.append(lis[index])
+        #获取四个板块中的链接和文字标题
+        for li in li_list:
+            url=li.xpath("./a/@href").extract_first()
+            title=li.xpath("./a/text()").extract_first()
+            #对每个板块对应的url发起请求，获取页面数据(标题，缩略图，关键字，发布时间，url)
+            yield scrapy.Request(url=url,callback=self.parseSecond,meta={"title":title})
+    def parseSecond(self,response):
+        #解析每个类页面中的新闻链接和相关信息
+        div_list = response.xpath('//div[@class="ndi_main"]/div')
+        for div in div_list:
+            head=div.xpath(".//div[@class='news_title']/h3/a/text()").extract_first()
+            url = div.xpath(".//div[@class='news_title']/h3/a/@href").extract_first()
+            img_url=div.xpath("./a/img/@src").extract_first()
+            tag=",".join(div.xpath(".//div[@class='keywords']//a/text()").extract())
+            time=div.xpath(".//div[@class='news_tag']/span/text()").extract_first()
+            #实例化item对象，将解析到的值存储到item中
             item=WangyiproItem()
-            item['title']=title
-            #对详情页的url进行手动请求发送一遍回去新闻的内容
-            yield scrapy.Request(url=news_detail_url,callback=self.parse_detail,meta={'item':item})
-    def parse_detail(self,response):
-        item=response.meta['item']  #信息的传递
-        #通过response解析出新闻的内容
-        content=response.xpath('//div[@id="endText"]//text()').extract()
-        content=''.join(content)
-        item['content']=content
+            item["head"]=head
+            item["url"]=url
+            item["img_url"]=img_url
+            item["tag"]=tag
+            item["title"] = response.meta["title"]
+            item["time"]=time
+            yield scrapy.Request(url=url,callback=self.getContent,meta={"item":item})
+    def getContent(self,response):
+        #解析新闻文本内容
+        item=response.meta.get("item")
+        content_list=response.xpath("//div[@class='post_text']/p/text()").extract()
+        content="\n".join(content_list)
+        item["content"]=content
         yield item
-    def closed(self,spider):   #关闭
-        print('爬虫整体结束!!!')
-        self.bro.quit()
+
+    def closed(self, spider):
+            # 实现父类方法，爬虫结束时调用
+            print("爬虫结束")
+            self.bro.quit()

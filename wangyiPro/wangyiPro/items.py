@@ -6,11 +6,12 @@
 # https://doc.scrapy.org/en/latest/topics/items.html
 
 import scrapy
-
-
 class WangyiproItem(scrapy.Item):
-    # define the fields for your item here like:
-    # name = scrapy.Field()
+    head = scrapy.Field()
+    tag = scrapy.Field()
+    url = scrapy.Field()
+    img_url = scrapy.Field()
     title=scrapy.Field()
     content=scrapy.Field()
+    time=scrapy.Field()
     pass
