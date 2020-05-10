@@ -14,4 +14,5 @@ class WangyiproItem(scrapy.Item):
     title=scrapy.Field()
     content=scrapy.Field()
     time=scrapy.Field()
+    comments=scrapy.Field()
     pass

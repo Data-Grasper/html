@@ -31,6 +31,7 @@ class WangyiSpider(scrapy.Spider):
             img_url=div.xpath("./a/img/@src").extract_first()
             tag=",".join(div.xpath(".//div[@class='keywords']//a/text()").extract())
             time=div.xpath(".//div[@class='news_tag']/span/text()").extract_first()
+            comments = div.xpath(".//div[@class='post_recommend_tie_wrap']/span/text()").extract_first()
             #实例化item对象，将解析到的值存储到item中
             item=WangyiproItem()
             item["head"]=head
@@ -39,6 +40,7 @@ class WangyiSpider(scrapy.Spider):
             item["tag"]=tag
             item["title"] = response.meta["title"]
             item["time"]=time
+            item["comments"] = comments
             yield scrapy.Request(url=url,callback=self.getContent,meta={"item":item})
     def getContent(self,response):
         #解析新闻文本内容

@@ -8,9 +8,10 @@
 
 class WangyiproPipeline(object):
     def process_item(self, item, spider):
-        print(item["title"])
+        print("类别：" + item["title"])
         print(item["content"])
-        print(item["time"])
-        print(item["tag"])
-        print(item["url"])
+        print("时间：" + item["time"])
+        print("标签：" + item["tag"])
+        print("url链接：" + item["url"])
+        print("评论数" + item["comments"])
         return item
